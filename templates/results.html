@@ -1,0 +1,52 @@
+<!--
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results</title>
+</head>
+<body>
+    <h1>Processing Results</h1>
+    {% for result in results %}
+    <div>
+        <h3>Original Image:</h3>
+        <img src="{{ url_for('static', filename=result.original) }}" alt="Original Image">
+        <h3>Processed Image:</h3>
+        <img src="{{ url_for('static', filename=result.processed) }}" alt="Processed Image">
+    </div>
+    {% endfor %}
+    <a href="/">Home</a>
+</body>
+</html>
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Results</title>
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Processing Results</h1>
+        {% for result in results %}
+        <div class="card mb-3">
+            <div class="row no-gutters">
+                <div class="col-md-6">
+                    <img src="{{ url_for('static', filename=result.original) }}" class="card-img" alt="Original Image">
+                </div>
+                <div class="col-md-6">
+                    <img src="{{ url_for('static', filename=result.processed) }}" class="card-img" alt="Processed Image">
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        <div class="text-center">
+            <a href="/" class="btn btn-primary">Home</a>
+        </div>
+    </div>
+</body>
+</html>

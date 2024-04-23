@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Object Detection</title>
+</head>
+<body>
+    <h1>Object Detection and Instance Segmentation</h1>
+    <form action="{{ url_for('object_detection') }}" method="post" enctype="multipart/form-data">
+        <input type="file" name="images" multiple accept="image/*">
+        <button type="submit">Upload Images</button>
+    </form>
+</body>
+</html>

@@ -1,25 +1,3 @@
-<!--
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Results</title>
-</head>
-<body>
-    <h1>Processing Results</h1>
-    {% for result in results %}
-    <div>
-        <h3>Original Image:</h3>
-        <img src="{{ url_for('static', filename=result.original) }}" alt="Original Image">
-        <h3>Processed Image:</h3>
-        <img src="{{ url_for('static', filename=result.processed) }}" alt="Processed Image">
-    </div>
-    {% endfor %}
-    <a href="/">Home</a>
-</body>
-</html>
--->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -27,26 +5,393 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <title>Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/botui/build/botui.min.css" rel="stylesheet" type="text/css">
+    <link href="https://cdn.jsdelivr.net/npm/botui/build/botui-theme-default.css" rel="stylesheet" type="text/css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+
+    <style>
+        body {
+            background-color: #f4f4f9;
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin-top: 5px;
+        }
+        .navbar-custom {
+            background-color: #007bff;
+            color: white;
+        }
+        .navbar-custom a {
+            color: white;
+        }
+        .card {
+            border-radius: 5px;
+            box-shadow: 0 2px 2px rgba(0,0,0,0.1);
+        }
+        .card-img-top {
+            object-fit: cover;
+            border-bottom: 1px solid #dee2e6;
+        }
+        #botui-app {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 80px;
+            height: 80px;
+            border-radius: 100%;  /* Circle initially */
+            background-color: #007bff; /* Blue background */
+            color: white;
+            text-align: center;
+            line-height: 60px; /* Center the text vertically */
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            overflow: hidden;
+            transition: width 0.3s ease, height 0.3s ease, border-radius 0.3s ease;
+        }
+        
+        #botui-app.expanded {
+            width: 400px; /* Expanded width */
+            height: 600px; /* Expanded height */
+            border-radius: 10px; /* Less rounded corners for rectangle shape */
+            line-height: normal; /* Reset line height for text inside */
+            padding: 10px; /* Padding inside the chatbot */
+            text-align: left; /* Align text to the left */
+        }
+        .toggle-button {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            font-size: 12px;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            display: none; /* Initially hidden */
+        }
+        
+        #botui-app.expanded .toggle-button, #botui-app.expanded .close-button {
+            display: block; /* Show buttons when expanded */
+        }
+        
+        .chart {
+            height: 300px; /* Placeholder for the chart height */
+        }
+        .section {
+            padding: 5px;
+        }
+        .full-height {
+            height: 100%;
+        }
+        .waving-hand {
+            animation: wave 2.1s 0.6s infinite;
+            transform-origin: 75% 75%;
+            font-size: 40px;
+            display: inline-block;
+          }
+        @keyframes wave {
+            0% {
+              transform: rotate(0deg);
+            }
+            10% {
+              transform: rotate(16deg);
+            }
+            20% {
+              transform: rotate(-6deg);
+            }
+            30% {
+              transform: rotate(16deg);
+            }
+            40% {
+              transform: rotate(-4deg);
+            }
+            50% {
+              transform: rotate(16deg);
+            }
+            60% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(0deg);
+            }
+          }
+
+    </style>
+    <title>Processing Results</title>
 </head>
-<body class="bg-light">
-    <div class="container mt-5">
-        <h1 class="text-center mb-4">Processing Results</h1>
-        {% for result in results %}
-        <div class="card mb-3">
-            <div class="row no-gutters">
-                <div class="col-md-6">
-                    <img src="{{ url_for('static', filename=result.original) }}" class="card-img" alt="Original Image">
-                </div>
-                <div class="col-md-6">
-                    <img src="{{ url_for('static', filename=result.processed) }}" class="card-img" alt="Processed Image">
-                </div>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="#">Your Company Logo</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Logout</a></li>
+                </ul>
             </div>
         </div>
-        {% endfor %}
-        <div class="text-center">
-            <a href="/" class="btn btn-primary">Home</a>
+    </nav>
+
+    <div class="container-fluid mt-3">
+        <div class="row">
+            {% for result in results %}
+            <div class="col-md-6 section">
+                <div class="card full-height">
+                    <img src="{{ url_for('static', filename=result.original) }}" class="card-img-top" alt="Original Image">
+                    <div class="card-body">
+                        <h5 class="card-title">Original Image</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 section">
+                <div class="card full-height">
+                    <img src="{{ url_for('static', filename=result.processed) }}" class="card-img-top" alt="Processed Image">
+                    <div class="card-body">
+                        <h5 class="card-title">Damage Detection and Instance Segmentation</h5>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="row">
+            {% for result in results %}
+            <div class="col-md-6 section">
+                <div class="card full-height">
+                    <img src="{{ url_for('static', filename=result.boxesonly) }}" class="card-img-top" alt="Bounding Box Image">
+                    <div class="card-body">
+                        <h5 class="card-title">Non Overlapping Major Damages</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 section">
+                <div class="card full-height">
+                    <img src="{{ url_for('static',filename=result.salient_od) }}" class="card-img-top" alt="Processed Image">
+                    <div class="card-body">
+                        <h5 class="card-title">Salient Object Detection</h5>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div> 
+        <div class = "row">
+            {% for result in results %}
+            <div class="col-md-6 section">
+                <div class="card full-height">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card-body">
+                                <h5 class="card-title">Damage Summary Chart</h5>
+                                <canvas id="labelPieChart"></canvas> <!-- Canvas for the pie chart -->
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card-body">
+                                <h5 class="card-title">Detailed Label Information</h5>
+                                <p id="summaryText"></p> <!-- Placeholder for the summary text -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 section">
+                <div class="card full-height">
+                    <div class="col-md-6">
+                        <div class="card-body">
+                            <h4 class="card-title">The approximate Damage Repair Cost is : <h1><b>$ {{result.repair_cost}} </b><h1></h4>
+                            <canvas id="labelPieChart"></canvas> <!-- Canvas for the pie chart -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+            <div class="col-md-10 section"> <i class="fa-solid fa-comment fa-lg"></i>
+                <div id="botui-app" > <i>help !!!</i>
+                    <bot-ui></bot-ui>
+                    <button id="toggle-btn" class="toggle-button"> open/close</button>
+                </div>                
+                
+            </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/botui/build/botui.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var botui = initializeBotUI(); // Initialize BotUI when the document is ready.
+        
+            document.getElementById('botui-app').addEventListener('click', function(event) {
+                if (event.target === this) { // Ensuring clicks directly on the botui-app div toggle the expansion.
+                    this.classList.toggle('expanded');
+                    initializeBotUI(this.classList.contains('expanded'));
+                }
+            });
+        
+            function toggleShape() {
+                var app = document.getElementById('botui-app');
+                // Check if currently is a circle (small size), and toggle between states.
+                if (app.style.width === '400px') {
+                    app.style.width = '60px';
+                    app.style.height = '60px';
+                    app.style.borderRadius = '50%'; // Circle
+                } else {
+                    app.style.width = '400px';
+                    app.style.height = '600px';
+                    app.style.borderRadius = '10px'; // Rectangle
+                }
+            }
+        
+            function initializeBotUI(expanded) {
+                var container = document.getElementById('botui-app');
+                if (expanded) {
+                    // Re-add bot UI components and buttons
+                    container.innerHTML = '<bot-ui>Hi</bot-ui><button id="toggle-btn" class="toggle-button"> ... </button>';
+                    botui = new BotUI('botui-app');
+                    bindButtonEvents();
+                    startBotUI(); // Start the BotUI interaction.
+                }
+            }
+        
+            function bindButtonEvents() {
+                document.getElementById('toggle-btn').addEventListener('click', function(event) {
+                    event.stopPropagation(); // Prevent the event from propagating to the botui-app.
+                    toggleShape();
+                });
+            }
+
+            function startBotUI() {
+                botui.message.add({
+                    content: 'Hello, what would you like to do next?'
+                }).then(function () {
+                    return botui.action.button({
+                        action: [
+                            { text: 'Generate Report', value: 'report' },
+                            { text: 'View Statistics', value: 'stats' },
+                            { text: 'Call for Help', value: 'help' },
+                            { text: 'Get Recommendations', value: 'recommend' }
+                        ]
+                    });
+                }).then(function (res) {
+                    handleResponse(res);
+                });
+            }
+        
+            function handleResponse(res) {
+                if (res.value == 'report') {
+                    generateReport();
+                } else if (res.value == 'stats') {
+                    viewStatistics();
+                } else if (res.value == 'help') {
+                    callForHelp();
+                } else if (res.value == 'recommend') {
+                    getRecommendations();
+                }
+            }
+        
+            function generateReport() {
+                botui.message.add({
+                    content: 'Generating your report...'
+                }).then(function () {
+                    botui.message.add({
+                        content: 'Report generated. Download here: [Download Report](#)'
+                    });
+                });
+            }
+        
+            function viewStatistics() {
+                botui.message.add({
+                    content: 'Here are the statistics based on recent detections...'
+                });
+            }
+        
+            function callForHelp() {
+                botui.message.add({
+                    content: 'Contacting help, please wait...'
+                }).then(function () {
+                    botui.message.add({
+                        content: 'Help is on the way!'
+                    });
+                });
+            }
+        
+            function getRecommendations() {
+                botui.message.add({
+                    content: 'Based on your results, we recommend the following...'
+                });
+            }
+        });
+        
+        document.addEventListener("DOMContentLoaded", function() {
+            var predictions = [{'labels': [0, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1], 'scores': [0.9580981135368347, 0.933692991733551, 0.6478923559188843, 0.40146005153656006, 0.3210628032684326, 0.22431078553199768, 0.14375555515289307, 0.12079610675573349, 0.10255570709705353, 0.07489709556102753, 0.06454921513795853]}];
+        
+            var labels = predictions[0].labels;
+            var labelCount = {};
+        
+            // Count each label's occurrence
+            labels.forEach(function(label) {
+                labelCount[label] = (labelCount[label] || 0) + 1;
+            });
+        
+            // Prepare data for the pie chart
+            var pieData = {
+                labels: Object.keys(labelCount),
+                datasets: [{
+                    label: 'Label Distribution',
+                    data: Object.values(labelCount),
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+        
+            // Create pie chart
+            var ctx = document.getElementById('labelPieChart').getContext('2d');
+            var myPieChart = new Chart(ctx, {
+                type: 'pie',
+                data: pieData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Label Distribution in Predictions'
+                        }
+                    }
+                }
+            });
+        
+            // Create summary text
+            var summaryText = 'Total labels detected: ' + labels.length;
+            Object.keys(labelCount).forEach(function(key) {
+                summaryText += `<br>Label ${key}: ${labelCount[key]} occurrences`;
+            });
+            document.getElementById('summaryText').innerHTML = summaryText;
+        });
+        
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

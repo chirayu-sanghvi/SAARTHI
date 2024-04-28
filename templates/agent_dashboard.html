@@ -1,0 +1,146 @@
+<!--
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Agent Dashboard</title>
+    </head>
+    <body>
+        <h1>Welcome {{ agent.name }}</h1>
+        <p>This is the Agent Dashboard</p>
+
+        {% for request in requests %}
+        <div class="request-card">
+            <p>Request ID: {{ request.id }}</p>
+            <p>Type: {{ request.type }}</p>
+            <p>Status: {{ request.status }}</p>
+            <button onclick="handleResponse({{ request.id }}, 'accept')">Accept</button>
+            <button onclick="handleResponse({{ request.id }}, 'reject')">Reject</button>
+        </div>
+        {% endfor %}
+        <script>
+            function handleResponse(requestId, action) {
+                fetch(`/agent/response/${requestId}/${action}`, { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert(data.message);  // Show a message with the outcome
+                        location.reload();   // Reload the page to update the status
+                    })
+                    .catch(error => console.error('Error handling request:', error));
+            }
+            </script>
+            <a href="{{ url_for('logout') }}">Logout</a>
+    </body>
+</html>
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Agent Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: url('/static/image/authentication.webp') no-repeat center center fixed;
+            background-size: cover;
+            color: #000;
+            margin: 0;
+        }
+        nav {
+            background: rgba(0, 0, 0, 0.85);
+            padding: 10px 20px;
+            text-align: center;
+        }
+        nav a {
+            color: #28a745;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 18px;
+            transition: color 0.3s;
+        }
+        nav a.logout-link {
+            float: right;
+        }
+        nav a:hover {
+            color: #1e7e34;
+        }
+        .dashboard-container {
+            padding: 20px;
+            max-width: 900px;
+            margin: auto;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #28a745;
+            border-collapse: collapse;
+        }
+        th {
+            background-color: #28a745;
+            color: #fff;
+        }
+        td {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .btn:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('logout') }}" class="logout-link">Logout</a>
+    </nav>
+    <div class="dashboard-container">
+        <h1>Welcome {{ agent.name }}</h1>
+        <table>
+            <tr>
+                <th>Request ID</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            {% for request in requests %}
+            <tr>
+                <td>{{ request.id }}</td>
+                <td>{{ request.type }}</td>
+                <td>{{ request.status }}</td>
+                <td>
+                    <button class="btn" onclick="handleResponse({{ request.id }}, 'accept')">Accept</button>
+                    <button class="btn" onclick="handleResponse({{ request.id }}, 'reject')">Reject</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <script>
+        function handleResponse(requestId, action) {
+            fetch(`/agent/response/${requestId}/${action}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    location.reload();
+                })
+                .catch(error => console.error('Error handling request:', error));
+        }
+    </script>
+</body>
+</html>
+

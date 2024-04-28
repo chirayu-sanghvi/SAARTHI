@@ -1,0 +1,154 @@
+<!--
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> User Dashboard </title>
+    </head>
+    <body>
+        <h1> Welcome, {{user.name}}</h1>
+        <h2> Your Past Requests: <h2>
+        <ul>
+            {% for req in requests %}
+            <li>
+                <strong> Type: </strong> {{req.type}}
+                <br>
+                <strong> Result Image: </strong> <img src="{{url_for('static', filename= req.result_image_path)}}" style = "width:100px">
+                <br>
+                <strong> Cost Estimation: </strong> ${{req.cost_estimation}}
+                <br>
+                <strong> Date: </strong> {{req.created_at.strftime('%Y-%m-%d %H:%M')}}
+            </li>
+            {% else %}
+            <p> No request found </p>
+            {% endfor %}
+        </ul>
+        <ul>
+            <li><a href="{{ url_for('object_detection')}}"> Damage Detection and Cost Estimation </a></li>
+        </ul>
+        <a href="{{ url_for('logout')}}"> Logout </a>
+        <script type="text/javascript">
+            // Check if user_id is passed from Flask and set it in session storage
+            if ("{{ user_id }}") {
+                sessionStorage.setItem('userId', "{{ user_id }}");
+            }
+        </script>
+        
+    </body>
+</html>
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: url('/static/image/authentication.webp') no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            color: #28a745;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        nav {
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            position: fixed;
+            top: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav a {
+            color: #28a745;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            color: #1e7e34;
+        }
+
+        .container {
+            margin-top: 60px;
+            width: 90%;
+            max-width: 1000px;
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 15px;
+            border: 1px solid #28a745;
+            text-align: left;
+            color: #333;
+        }
+
+        th {
+            background-color: #28a745;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        img {
+            width: 100px;
+            height: auto;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('logout') }}">Logout</a>
+        <a href="{{ url_for('home') }}">Home</a>
+    </nav>
+    <div class="container">
+        <h1>Welcome, {{ user.name }}</h1>
+        <h2>Your Past Requests:</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Result Image</th>
+                    <th>Cost Estimation</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in requests %}
+                <tr>
+                    <td>{{ req.type }}</td>
+                    <td><img src="{{ url_for('static', filename=req.result_image_path) }}"></td>
+                    <td>${{ req.cost_estimation }}</td>
+                    <td>{{ req.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4">No request found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{{ url_for('object_detection') }}" class="services-link">Damage Detection and Cost Estimation</a>
+    </div>
+</body>
+</html>
+

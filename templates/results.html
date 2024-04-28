@@ -9,8 +9,11 @@
     <link href="https://cdn.jsdelivr.net/npm/botui/build/botui-theme-default.css" rel="stylesheet" type="text/css">
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/botui/build/botui.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBwNPVNPUUaxDK7FMh_l8NatX8xsWdfE-8&libraries=places"></script>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <style>
         body {
             background-color: #f4f4f9;
@@ -129,7 +132,8 @@
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Logout</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/user_dashboard">User Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
                 </ul>
             </div>
         </div>
@@ -220,7 +224,14 @@
 
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/botui/build/botui.min.js"></script>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket.on('connect', function() {
+            console.log('Connected to the server!');
+        });
+
         document.addEventListener("DOMContentLoaded", function() {
             var botui = initializeBotUI(); // Initialize BotUI when the document is ready.
         
@@ -271,27 +282,215 @@
                         action: [
                             { text: 'Generate Report', value: 'report' },
                             { text: 'View Statistics', value: 'stats' },
-                            { text: 'Call for Help', value: 'help' },
-                            { text: 'Get Recommendations', value: 'recommend' }
+                            { text: 'Call for Help', value: 'help_options' },
+                           // { text: 'Get Recommendations', value: 'recommend' }
                         ]
                     });
                 }).then(function (res) {
                     handleResponse(res);
-                });
+                }).catch(function (err){
+                    console.error('Error in yuvi chatbot response handling:', err);
+                })
             }
         
             function handleResponse(res) {
-                if (res.value == 'report') {
-                    generateReport();
-                } else if (res.value == 'stats') {
-                    viewStatistics();
-                } else if (res.value == 'help') {
-                    callForHelp();
-                } else if (res.value == 'recommend') {
-                    getRecommendations();
+                switch(res.value) {
+                    case 'report':
+                        generateReport()
+                        break;
+                    case 'stats':
+                        viewStatistics()
+                        break;
+                    case 'help_options':
+                        showHelpOptions()
+                        break;
                 }
             }
-        
+
+            function showHelpOptions() {
+                botui.message.add({
+                    content: 'what kind of help you want from me ? '
+                }).then(function(){
+                    return botui.action.button({
+                        action: [
+                            { text: 'Help for On-the-Spot Damage Repair', value: 'on_spot_repair'},
+                            { text: 'Call for Tow', value: 'call_tow'},
+                            { text: 'Need Fuel', value: 'need_fuel'},
+                            { text: 'Make an Appointment for Damage Repair', value: 'make_appoinment'}
+                        ]
+                    });
+                }).then(function (res){
+                    if(res.value === 'make_appoinment'){
+                        makeAppointment();
+                    } else {
+                        requestLocation(res.value);
+                    }
+                });
+            }
+
+            function requestLocation(helpType){
+                botui.message.add({
+                    content: "We need to access yout location, please confirm",
+                    delay: 1000,
+                }).then(function () {
+                    return botui.action.button({
+                        action: [ 
+                            { text: 'Yes', value: 'yes'},
+                            { text: 'No', value: 'no'}
+                        ]
+                    })
+                }).then(function (res){
+                    if(res.value === 'yes') {
+                        fetchUserLocation(helpType);
+                    } else {
+                        botui.message.add({
+                            content: 'Location access denied, Unable to proceed'
+                        });
+                    }
+                });
+            }
+
+            function fetchUserLocation(helpType){
+                if("geolocation" in navigator) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        reverseGeocodeLocation(helpType, position.coords.latitude, position.coords.longitude);
+                    }, function () {
+                        botui.message.add({
+                            content: 'Failed to access location.',
+                        });
+                    });
+                } else {
+                    botui.message.add({
+                        content: "Geolocation is not supported by your browser",
+                    });
+                }
+            }
+
+            function reverseGeocodeLocation(helpType, lat, lng) {
+                var geocoder = new google.maps.Geocoder();
+                var latlng = {lat: parseFloat(lat), lng: parseFloat(lng)};
+                var apiKey = '';  // Replace with your actual API key
+            
+                geocoder.geocode({'location': latlng}, function(results, status) {
+                    if (status === 'OK') {
+                        if (results[0]) {
+                            var address = results[0].formatted_address;
+                            var mapsImageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=15&size=600x300&markers=color:red%7C${lat},${lng}&key=${apiKey}`;
+                            var mapsLink = `https://www.google.com/maps/?q=${lat},${lng}`;
+                            botui.message.add({
+                                type: 'html',
+                                content: `<div class="map-card">
+                                            <img src="${mapsImageUrl}" alt="Location Map">
+                                            <p class="map-address">${address}</p>
+                                            <a href="${mapsLink}" target="_blank" class="map-link">View on Google Maps</a>
+                                        </div>`
+                            }).then(function () {
+                                confirmAndSendLocation(helpType, lat, lng, address);
+                            });
+                        } else {
+                            botui.message.add({content: 'No results found for the location.'});
+                        }
+                    } else {
+                        botui.message.add({content: `Geocoder failed due to: ${status}`});
+                    }
+                });
+            }
+
+            function confirmAndSendLocation(helpType, lat, lng, address) {
+                    botui.message.add({
+                        content: "Fetched Location is correct, Please confirm !!!!",
+                    }).then(function () {
+                        return botui.action.button({
+                            action: [ 
+                                { text: 'Yes', value: 'yes'},
+                                { text: 'No', value: 'no'}
+                            ]
+                        })
+                    }).then(function (res){
+                        if(res.value === 'yes') {
+                            sendLocationToServer(helpType, lat, lng, address);
+                        } else {
+                            /* botui.message.add({
+                                content: 'Wrong location fetched'
+                            }); */
+                            var location;
+                            botui.message.add({
+                                content: 'Please enter your location'
+                            }).then(function () {
+                                return botui.action.text({ // show 'text' action
+                                action: {
+                                    placeholder: 'Enter your location'
+                                }
+                                });
+                            }).then(function (res) { // will be called when it is submitted.
+                                location = res.value; // save the result
+                                sendLocationToServer(helpType, lat, lng, location); // use the result
+                            });
+                        }
+                });
+            }
+
+            function sendLocationToServer(helpType, lat, lng, address) {
+                var userId = sessionStorage.getItem('userId');
+                if (!userId) {
+                    console.error('User ID is not available in session storage.');
+                }
+                $.ajax({
+                    url: '/api/create_request',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        user_id: userId,
+                        help_type: helpType,
+                        latitude: lat,
+                        longitude: lng,
+                        address: address
+                    }),
+                    dataType: 'json',
+                    success: function(response) {
+                        botui.message.add({
+                            content: 'Request created! An agent will contact you soon.'
+                        });
+                        socket.on('agent_info', function(data) {
+                            console.log('Received agent info:', data);
+                            if (data.user_id === sessionStorage.getItem('userId')) {
+                                botui.message.add({
+                                    human: false,
+                                    content: data.message
+                                }); // Handle the display of this message in your app appropriately
+                            }
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        botui.message.add({
+                            content: 'Failed to create request. Please try again.'
+                        });
+                    }
+                });
+            }
+  /*              botui.message.add({
+                    content: "Intiating your request and waiting for an agent to repond ..."
+                }).then(function () {
+                    var userId = sessionStorage.getItem('userId'); // Adjust according to where and how you have stored `userId`
+                    return $.post('/api/create_request', {
+                        user_id: userId,
+                        help_type: helpType,
+                        latitute: lat,
+                        longitude: lng,
+                        address: address
+                    
+                    });
+                }).then(function (response){
+                    bitui.message.add({
+                        content: 'A request for help has been created !!, Our agent will contact you soon. Thank you for your patience'
+                    });
+                }).fail(function(err){
+                    botui.message.add({
+                        content: 'There was a problem creating your request. please try again'
+                    });
+                });
+            }
+*/
             function generateReport() {
                 botui.message.add({
                     content: 'Generating your report...'
@@ -307,7 +506,7 @@
                     content: 'Here are the statistics based on recent detections...'
                 });
             }
-        
+            initializeBotUI();
             function callForHelp() {
                 botui.message.add({
                     content: 'Contacting help, please wait...'
@@ -388,9 +587,8 @@
             });
             document.getElementById('summaryText').innerHTML = summaryText;
         });
-        
+
     </script>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>

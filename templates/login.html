@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Login Portal</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: url('/static/image/authentication.webp') no-repeat center center fixed;  
+            background-size: cover;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            background: rgba(0, 0, 0, 1); /* Full opacity for black */
+            padding: 50px;
+            border-radius: 30px;
+            box-shadow: 0 8px 8px rgba(0, 0, 0, 1);
+            max-width: 700px;
+            width: 100%;
+            color: #28a745; /* Green text */
+            text-align: center;
+        }
+
+        h1 {
+            color: #28a745; /* Green accent color */
+            margin-bottom: 30px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        input[type="email"], input[type="password"] {
+            padding: 20px;
+            margin: 10px 0; /* Added margin to separate the inputs */
+            border-radius: 5px;
+            border: 1px solid #28a745;
+            background-color: #fff;
+            color: #333;
+            font-size: 25px;
+            width: calc(100% - 40px); /* Adjust width to account for padding */
+        }
+
+        input[type="submit"] {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+            border: none;
+            color: white;
+            background-color: #28a745;
+            font-size: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            width: calc(100%);
+        }
+
+        input[type="submit"]:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        a {
+            color: #28a745;
+            margin-top: 10px;
+            text-decoration: none;
+            transition: color 0.3s, transform 0.3s;
+            font-size: 25px;
+        }
+
+        a:hover {
+            color: #1e7e34;
+            transform: translateY(-2px);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: space-between; /* This will place the links on opposite ends */
+            margin-top: 20px; /* Spacing from the form */
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>User Portal Login</h1>
+        <form action="" method="post">
+            <input type="email" name="email" placeholder="Enter your email">
+            <input type="password" name="password" placeholder="Enter your password">
+            <input type="submit" value="LOGIN">
+        </form>
+        <div class="footer-links">
+            <a href="{{ url_for('register') }}">Register</a>
+            <a href="{{ url_for('home') }}">Return to Home</a>
+        </div>
+    </div>
+</body>
+</html>

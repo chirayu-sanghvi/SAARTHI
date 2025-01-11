@@ -1,13 +1,13 @@
-# Cardd - Car Damage Detection and Assessment System
+# SAARTHI: Smart Auto Assessment and Roadside Technical Help Interface
 
-Car Damage Detection and Assessment (Cardd) is a machine learning-powered web application designed to detect and assess damages in cars. The project uses a U-Net-based deep learning model for segmentation and classification of car damages, providing detailed visualizations and cost estimates.
+The Smart Auto Assessment and Roadside Technical Help Interface (SAARTHI) provides a comprehensive end-to-end solution, leveraging computer vision technologies for rapid damage assessment, consistent repair cost estimation, immediate repair coordination, towing services, and faster insurance processes.
 
 ---
 ## Saarthi Framework and Website
 
 - **Saarthi Website**: Visit the live project at [Saarthi](https://sites.google.com/view/saarthi-home/home)
 - **Framework Overview**:  
-  ![Saarthi Framework](saarthi_framework_workflow_diagram.png){ width=600px }
+  ![Saarthi Framework](saarthi_framework_workflow_diagram.png)
 
 
 ---
